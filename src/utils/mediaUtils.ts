@@ -120,4 +120,93 @@ export const validateMedia = (file: File) => {
   }
 
   return file.type.split('/')[0] as 'image' | 'video';
+};
+
+const MAX_FILE_SIZE_MB = 2; // Maximum file size in megabytes
+
+export const convertImageToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    // Check file size
+    const fileSizeInMB = file.size / (1024 * 1024);
+    if (fileSizeInMB > MAX_FILE_SIZE_MB) {
+      reject(new Error(`File size should not exceed ${MAX_FILE_SIZE_MB}MB`));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64String = reader.result as string;
+      resolve(base64String);
+    };
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'));
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
+export const validateAndResizeImage = async (file: File): Promise<string> => {
+  try {
+    // Create an image element to check dimensions
+    const img = document.createElement('img');
+    const imageUrl = URL.createObjectURL(file);
+    
+    return new Promise((resolve, reject) => {
+      img.onload = async () => {
+        URL.revokeObjectURL(imageUrl);
+        
+        // If image is already small enough, convert directly
+        if (file.size / (1024 * 1024) <= MAX_FILE_SIZE_MB) {
+          try {
+            const base64 = await convertImageToBase64(file);
+            resolve(base64);
+          } catch (error) {
+            reject(error);
+          }
+          return;
+        }
+
+        // Create canvas for resizing
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+
+        // Calculate new dimensions while maintaining aspect ratio
+        let { width, height } = img;
+        const maxDimension = 1200; // Max width/height in pixels
+
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = (height / width) * maxDimension;
+            width = maxDimension;
+          } else {
+            width = (width / height) * maxDimension;
+            height = maxDimension;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw resized image to canvas
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to base64 with reduced quality
+        const base64String = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(base64String);
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(imageUrl);
+        reject(new Error('Failed to load image'));
+      };
+
+      img.src = imageUrl;
+    });
+  } catch (error) {
+    throw new Error('Failed to process image');
+  }
 }; 

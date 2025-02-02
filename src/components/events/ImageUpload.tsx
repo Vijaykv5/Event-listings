@@ -1,79 +1,91 @@
-import { ImageUp, Video } from "lucide-react";
+import { ChangeEvent, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { Card } from "../ui/card";
-import { MediaUploadProps } from "../../types/event";
+import { ImagePlus, Loader2 } from "lucide-react";
+import { validateAndResizeImage } from "../../utils/mediaUtils";
+import { toast } from "sonner";
 
-export function MediaUpload({
-  mediaUrl,
-  onMediaChange,
-  mediaType,
-}: MediaUploadProps) {
+interface ImageUploadProps {
+  onImageSelect: (base64Image: string) => void;
+  className?: string;
+}
+
+export default function ImageUpload({
+  onImageSelect,
+  className = "",
+}: ImageUploadProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsLoading(true);
+      const base64Image = await validateAndResizeImage(file);
+
+      // Remove existing image before adding a new one
+      setPreviewUrl(null);
+      setTimeout(() => setPreviewUrl(base64Image), 100); 
+
+      onImageSelect(base64Image);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to process image"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
-    <Card className="aspect-[4/5] sm:aspect-[4/5] border-2 border-dashed border-gray-200 bg-gradient-to-br from-[#F8FAFF] via-[#E6EBFF] to-[#F8FAFF] hover:from-[#F5F8FF] hover:via-[#E3E8FF] hover:to-[#F5F8FF] transition-colors duration-200 rounded-xl sm:rounded-2xl overflow-hidden">
-      {mediaUrl ? (
-        <div className="relative w-full h-full">
-          {mediaType === "video" ? (
-            <video
-              src={mediaUrl}
-              className="absolute inset-0 w-full h-full object-cover"
-              controls
-            />
-          ) : (
-            <img
-              src={mediaUrl}
-              alt="Event"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          )}
-          <Button
-            variant="secondary"
-            className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 shadow-lg text-sm sm:text-base z-10"
-            onClick={() => document.getElementById("media-upload")?.click()}
-          >
-            {mediaType === "video" ? (
-              <Video className="w-4 h-4 mr-2" />
-            ) : (
-              <ImageUp className="w-4 h-4 mr-2" />
-            )}
-            Replace {mediaType === "video" ? "Video" : "Photo"}
-          </Button>
-          <input
-            id="media-upload"
-            type="file"
-            accept="image/*,video/*"
-            className="hidden"
-            onChange={onMediaChange}
-          />
-        </div>
-      ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center p-4 sm:p-6">
-          <div className="flex flex-col items-center gap-4 sm:gap-6">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 relative">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/7603/7603138.png"
-                alt="Upload placeholder"
-                className="w-full h-full object-contain drop-shadow-md"
-              />
-            </div>
-            <Button
-              variant="secondary"
-              className="bg-white shadow-md hover:shadow-lg transition-shadow duration-200 text-sm sm:text-base"
-              onClick={() => document.getElementById("media-upload")?.click()}
-            >
-              <ImageUp className="w-4 h-4 mr-2" />
-              Add Photo
-            </Button>
+    <div className={`relative ${className}`}>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleImageChange}
+        ref={fileInputRef}
+        className="hidden"
+      />
 
-            <input
-              id="media-upload"
-              type="file"
-              accept="image/*,video/*"
-              className="hidden"
-              onChange={onMediaChange}
-            />
-          </div>
-        </div>
-      )}
-    </Card>
+      <div className="relative aspect-[1/1] w-full max-w-sm mx-auto rounded-xl overflow-hidden bg-gradient-to-b from-blue-50 to-blue-200 shadow-lg flex flex-col items-center justify-center">
+        {previewUrl ? (
+          <img
+            src={previewUrl}
+            alt="Uploaded preview"
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
+          />
+        ) : (
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/7603/7603138.png"
+            alt="Placeholder"
+            className="h-24 w-24"
+          />
+        )}
+
+        <Button
+          variant="outline"
+          className="absolute bottom-4 flex gap-2 bg-white/80 px-4 py-2 rounded-lg shadow-md backdrop-blur-md"
+          onClick={handleClick}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <ImagePlus className="h-4 w-4" />
+              <span className="text-sm">
+                {previewUrl ? "Replace Photo" : "Add Photo"}
+              </span>
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }
