@@ -54,13 +54,13 @@ export function EventDateTime({
     <div className="space-y-2">
       <Popover>
         <PopoverTrigger asChild>
-          <div className="flex items-center justify-between w-full cursor-pointer p-3 border rounded-lg hover:bg-gray-50">
+          <div className="flex items-center justify-between w-full cursor-pointer p-3  rounded-lg hover:bg-gray-50">
             <div className="flex items-center gap-2">
               <ChevronUp className="h-5 w-5 text-gray-500" />
-              <span className="text-gray-700 font-medium">Starts</span>
+              <span className="text-gray-700  font-medium">Starts</span>
             </div>
-            <div className="px-4 py-2 rounded-full bg-gray-50">
-              <span className="text-gray-700">
+            <div className="px-4 py-2 rounded-3xl bg-gray-50 border border-gray-200">
+              <span className="text-gray-700 ">
                 {formatDateTime(startDate, startTime)}
               </span>
             </div>
@@ -74,7 +74,7 @@ export function EventDateTime({
             initialFocus
           />
           <div className="p-3 border-t">
-            <Select 
+            <Select
               value={startTime}
               onValueChange={(value) => onStartDateChange({ startTime: value })}
             >
@@ -95,12 +95,12 @@ export function EventDateTime({
 
       <Popover>
         <PopoverTrigger asChild>
-          <div className="flex items-center justify-between w-full cursor-pointer p-3 border rounded-lg hover:bg-gray-50">
+          <div className="flex items-center justify-between w-full cursor-pointer p-3  rounded-lg hover:bg-gray-50">
             <div className="flex items-center gap-2">
               <ChevronDown className="h-5 w-5 text-gray-500" />
               <span className="text-gray-700 font-medium">Ends</span>
             </div>
-            <div className="px-4 py-2 rounded-full bg-gray-50">
+            <div className="px-4 py-2 rounded-3xl bg-gray-50 border border-gray-200">
               <span className="text-gray-700">
                 {formatDateTime(endDate, endTime)}
               </span>
@@ -115,7 +115,7 @@ export function EventDateTime({
             initialFocus
           />
           <div className="p-3 border-t">
-            <Select 
+            <Select
               value={endTime}
               onValueChange={(value) => onEndDateChange({ endTime: value })}
             >
@@ -133,6 +133,7 @@ export function EventDateTime({
           </div>
         </PopoverContent>
       </Popover>
+      <span className="h-2 w-full bg-slate-300"></span>
     </div>
   );
 }

@@ -5,6 +5,7 @@ export interface Event {
   location: string;
   description: string;
   imageUrl: string;
+  mediaType?: 'image' | 'video';
   startDate?: string;
   endDate?: string;
   startTime?: string;

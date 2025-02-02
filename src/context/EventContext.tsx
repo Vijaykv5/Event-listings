@@ -40,7 +40,6 @@ export const EventProvider = ({ children }: { children: ReactNode }) => {
   };
 
   //store the events objects to local storage
-
   const saveEvent = () => {
     const storedEvents = JSON.parse(localStorage.getItem("events") || "[]");
     storedEvents.push(eventData);
