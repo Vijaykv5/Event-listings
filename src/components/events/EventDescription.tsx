@@ -2,11 +2,7 @@ import { Pencil, ChevronRight } from "lucide-react";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { useState } from "react";
-
-interface EventDescriptionProps {
-  description: string;
-  onDescriptionChange: (description: string) => void;
-}
+import { EventDescriptionProps } from "../../types/event";
 
 export function EventDescription({ description, onDescriptionChange }: EventDescriptionProps) {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
@@ -46,8 +42,7 @@ export function EventDescription({ description, onDescriptionChange }: EventDesc
                 {description ? "Edit Description" : "Add Description"}
               </div>
               <div className="text-xs sm:text-sm text-gray-500 font-normal">
-                {description ||
-                  "Add a brief description to let attendees know what your event is all about"}
+                {description || "Add a brief description "}
               </div>
             </div>
           </div>

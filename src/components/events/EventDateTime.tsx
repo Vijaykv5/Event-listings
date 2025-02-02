@@ -1,12 +1,6 @@
-
-import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Calendar } from "../ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   Select,
   SelectContent,
@@ -14,26 +8,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
+import { EventDateTimeProps } from "../../types/event";
 
-interface EventDateTimeProps {
-  onStartDateChange?: (date: Date) => void;
-  onEndDateChange?: (date: Date) => void;
-}
-
-export function EventDateTime({
-  onStartDateChange,
-  onEndDateChange,
+export function EventDateTime({ 
+  startDate, 
+  endDate, 
+  startTime, 
+  endTime,
+  onStartDateChange, 
+  onEndDateChange 
 }: EventDateTimeProps) {
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
-  const [startTime, setStartTime] = useState("19:00");
-  const [endTime, setEndTime] = useState("21:00");
-
   const timeOptions = Array.from({ length: 48 }, (_, i) => {
     const hour = Math.floor(i / 2);
     const minute = i % 2 === 0 ? "00" : "30";
-    const period = hour >= 12 ? "PM" : "AM";
+    const period = hour < 12 ? "AM" : "PM";
     const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
     return {
       value: `${hour.toString().padStart(2, "0")}:${minute}`,
@@ -42,38 +31,37 @@ export function EventDateTime({
   });
 
   const handleStartDateSelect = (date: Date | undefined) => {
-    setStartDate(date);
-    if (onStartDateChange && date) onStartDateChange(date);
+    if (date) {
+      onStartDateChange({ startDate: date.toISOString() });
+    }
   };
 
   const handleEndDateSelect = (date: Date | undefined) => {
-    setEndDate(date);
-    if (onEndDateChange && date) onEndDateChange(date);
+    if (date) {
+      onEndDateChange({ endDate: date.toISOString() });
+    }
   };
 
-  const formatDateTime = (date: Date | undefined, time: string) => {
+  // formatting date to "Mon, 16 Dec at 5.00 PM" format
+  const formatDateTime = (date?: Date, time?: string) => {
     if (!date) return "Select date and time";
-    const [hours, minutes] = time.split(":");
-    const dateWithTime = new Date(date);
-    dateWithTime.setHours(Number.parseInt(hours));
-    dateWithTime.setMinutes(Number.parseInt(minutes));
-    return format(dateWithTime, "EEE, dd MMM 'at' h:mm a");
+    const dateStr = format(date, "EEE, MMM d");
+    if (!time) return dateStr;
+    return `${dateStr} at ${format(parse(time, "HH:mm", date), "h:mm a")}`;
   };
 
   return (
     <div className="space-y-2">
       <Popover>
         <PopoverTrigger asChild>
-          <div className="flex items-center justify-between w-full cursor-pointer">
+          <div className="flex items-center justify-between w-full cursor-pointer p-3 border rounded-lg hover:bg-gray-50">
             <div className="flex items-center gap-2">
               <ChevronUp className="h-5 w-5 text-gray-500" />
               <span className="text-gray-700 font-medium">Starts</span>
             </div>
-            <div className="  border-gray-200  px-4 py-2 rounded-full">
+            <div className="px-4 py-2 rounded-full bg-gray-50">
               <span className="text-gray-700">
-                {startDate
-                  ? formatDateTime(startDate, startTime)
-                  : "Select date and time"}
+                {formatDateTime(startDate, startTime)}
               </span>
             </div>
           </div>
@@ -86,7 +74,10 @@ export function EventDateTime({
             initialFocus
           />
           <div className="p-3 border-t">
-            <Select value={startTime} onValueChange={setStartTime}>
+            <Select 
+              value={startTime}
+              onValueChange={(value) => onStartDateChange({ startTime: value })}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select time" />
               </SelectTrigger>
@@ -104,16 +95,14 @@ export function EventDateTime({
 
       <Popover>
         <PopoverTrigger asChild>
-          <div className="flex items-center justify-between w-full cursor-pointer">
+          <div className="flex items-center justify-between w-full cursor-pointer p-3 border rounded-lg hover:bg-gray-50">
             <div className="flex items-center gap-2">
               <ChevronDown className="h-5 w-5 text-gray-500" />
               <span className="text-gray-700 font-medium">Ends</span>
             </div>
-            <div className="bg-gray-100 px-4 py-2 rounded-full">
+            <div className="px-4 py-2 rounded-full bg-gray-50">
               <span className="text-gray-700">
-                {endDate
-                  ? formatDateTime(endDate, endTime)
-                  : "Select date and time"}
+                {formatDateTime(endDate, endTime)}
               </span>
             </div>
           </div>
@@ -126,7 +115,10 @@ export function EventDateTime({
             initialFocus
           />
           <div className="p-3 border-t">
-            <Select value={endTime} onValueChange={setEndTime}>
+            <Select 
+              value={endTime}
+              onValueChange={(value) => onEndDateChange({ endTime: value })}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select time" />
               </SelectTrigger>

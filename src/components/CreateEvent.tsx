@@ -1,24 +1,30 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { ImageUpload } from "./events/ImageUpload";
 import { EventForm } from "./events/EventForm";
 import { EventDateTime } from "./events/EventDateTime";
 import { EventLocation } from "./events/EventLocation";
 import { EventDescription } from "./events/EventDescription";
+import { useEvent } from "../context/EventContext";
 
 export default function CreateEvent() {
-  const [imageUrl, setImageUrl] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
+  const navigate = useNavigate();
+  const { eventData, setEventData, saveEvent } = useEvent();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (imageUrl) {
-        URL.revokeObjectURL(imageUrl);
+      if (eventData.imageUrl) {
+        URL.revokeObjectURL(eventData.imageUrl);
       }
       const url = URL.createObjectURL(file);
-      setImageUrl(url);
+      setEventData({ imageUrl: url });
     }
+  };
+
+  const handleSubmit = () => {
+    saveEvent();
+    navigate("/events");
   };
 
   return (
@@ -32,21 +38,50 @@ export default function CreateEvent() {
         </div>
 
         <div className="space-y-6 sm:space-y-8">
-          <ImageUpload imageUrl={imageUrl} onImageChange={handleImageChange} />
+          <ImageUpload
+            imageUrl={eventData.imageUrl}
+            onImageChange={handleImageChange}
+          />
 
-          <EventForm />
+          <EventForm
+            value={eventData.title}
+            onChange={(e) => setEventData({ title: e.target.value })}
+            community={eventData.community}
+            onCommunityChange={(community) => setEventData({ community })}
+          />
 
-          <EventDateTime />
+          <EventDateTime
+            startDate={
+              eventData.startDate ? new Date(eventData.startDate) : undefined
+            }
+            endDate={
+              eventData.endDate ? new Date(eventData.endDate) : undefined
+            }
+            startTime={eventData.startTime}
+            endTime={eventData.endTime}
+            onStartDateChange={setEventData}
+            onEndDateChange={setEventData}
+          />
 
           <div className="space-y-2 sm:space-y-3">
-            <EventLocation />
+            <EventLocation
+              location={eventData.location}
+              onLocationChange={(e) =>
+                setEventData({ location: e.target.value })
+              }
+            />
             <EventDescription
-              description={description}
-              onDescriptionChange={setDescription}
+              description={eventData.description}
+              onDescriptionChange={(description) =>
+                setEventData({ description })
+              }
             />
           </div>
 
-          <Button className="w-full py-4 sm:py-6 text-base sm:text-lg font-medium rounded-lg sm:rounded-xl bg-[#7C76CC] hover:bg-[#6A64B8] text-white transition-colors duration-200">
+          <Button
+            onClick={handleSubmit}
+            className="w-full py-4 sm:py-6 text-base sm:text-lg font-medium rounded-lg sm:rounded-xl bg-[#7C76CC] hover:bg-[#6A64B8] text-white transition-colors duration-200"
+          >
             Create Event
           </Button>
         </div>

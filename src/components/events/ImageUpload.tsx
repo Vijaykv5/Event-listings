@@ -1,11 +1,7 @@
 import { ImageUp } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-
-interface ImageUploadProps {
-  imageUrl: string;
-  onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
+import { ImageUploadProps } from "../../types/event";
 
 export function ImageUpload({ imageUrl, onImageChange }: ImageUploadProps) {
   return (
