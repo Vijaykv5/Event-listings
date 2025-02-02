@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { ImageUpload } from "./events/ImageUpload";
+import { MediaUpload } from "./events/ImageUpload";
 import { EventForm } from "./events/EventForm";
 import { EventDateTime } from "./events/EventDateTime";
 import { EventLocation } from "./events/EventLocation";
@@ -38,9 +38,9 @@ export default function CreateEvent() {
         </div>
 
         <div className="space-y-6 sm:space-y-8">
-          <ImageUpload
-            imageUrl={eventData.imageUrl}
-            onImageChange={handleImageChange}
+          <MediaUpload
+            mediaUrl={eventData.imageUrl}
+            onMediaChange={handleImageChange}
           />
 
           <EventForm

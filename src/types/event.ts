@@ -1,3 +1,5 @@
+import { ProcessedMedia } from "../utils/mediaUtils";
+
 export interface Event {
   title: string;
   location: string;
@@ -36,7 +38,8 @@ export interface EventDescriptionProps {
   onDescriptionChange: (description: string) => void;
 }
 
-export interface ImageUploadProps {
-  imageUrl: string;
-  onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+export interface MediaUploadProps {
+  mediaUrl?: string;
+  onMediaChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  mediaType?: 'image' | 'video';
 } 
